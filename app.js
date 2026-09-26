@@ -78,10 +78,47 @@ if (contactForm) {
       );
 
       status.className = "form-status success";
-      status.innerHTML =
-        "Submitted successfully. Your Application Number is " +
-        `<strong>${escapeHtml(data.applicationNumber)}</strong>. ` +
-        "Save it to track your application.";
+      status.innerHTML = `
+        <div class="application-number-result">
+          <span>Application Number</span>
+          <div class="application-number-row">
+            <input
+              id="applicationNumberResult"
+              type="text"
+              value="${escapeHtml(data.applicationNumber)}"
+              readonly
+              aria-label="Application Number"
+            >
+            <button
+              class="button"
+              type="button"
+              id="copyApplicationNumber"
+            >
+              Copy
+            </button>
+          </div>
+          <small>Save this 8-digit number to track your application.</small>
+        </div>
+      `;
+
+      document
+        .querySelector("#copyApplicationNumber")
+        .addEventListener("click", async () => {
+          const copyButton = document.querySelector("#copyApplicationNumber");
+
+          try {
+            await navigator.clipboard.writeText(data.applicationNumber);
+            copyButton.textContent = "Copied";
+            setTimeout(() => {
+              copyButton.textContent = "Copy";
+            }, 1800);
+          } catch {
+            const input = document.querySelector("#applicationNumberResult");
+            input.focus();
+            input.select();
+            copyButton.textContent = "Select & Copy";
+          }
+        });
 
       contactForm.reset();
     } catch (error) {
