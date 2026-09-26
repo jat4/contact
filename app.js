@@ -1,5 +1,217 @@
-const SUPABASE_URL="https://dxmyyymeyypxcjtmelvj.supabase.co";const SUPABASE_KEY="sb_publishable_Tp-IbPEmWXuBvZ8md8CY7Q_TCua9njd";
-async function callFunction(name,body){const res=await fetch(SUPABASE_URL+"/functions/v1/"+name,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY},body:JSON.stringify(body)});const data=await res.json().catch(()=>({error:"Unexpected server response"}));if(!res.ok)throw new Error(data.error||"Request failed");return data}
-const esc=(s="")=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));const fmt=s=>new Date(s).toLocaleString([],{dateStyle:"medium",timeStyle:"short"});
-const contactForm=document.querySelector("#contactForm");if(contactForm)contactForm.addEventListener("submit",async e=>{e.preventDefault();const b=document.querySelector("#submitButton"),st=document.querySelector("#formStatus");b.disabled=true;st.className="form-status";st.textContent="Submitting...";try{const d=await callFunction("submit-contact",Object.fromEntries(new FormData(contactForm).entries()));st.className="form-status success";st.innerHTML="Submitted successfully. Your Application Number is <strong>"+esc(d.applicationNumber)+"</strong>. Save it to track your application.";contactForm.reset()}catch(err){st.className="form-status error";st.textContent=err.message}finally{b.disabled=false}});
-const trackForm=document.querySelector("#trackForm");if(trackForm){let current=null;const render=({application,messages})=>{current=application;const box=document.querySelector("#conversation");box.classList.remove("hidden");box.innerHTML='<div class="conversation-head"><h2>Application '+esc(application.applicationNumber)+'</h2><div class="meta">Status: <strong>'+esc(application.status.replace("_"," "))+'</strong> · Submitted '+esc(fmt(application.createdAt))+'</div></div><div class="messages">'+messages.map(m=>'<div class="bubble '+esc(m.sender_type)+'"><small>'+(m.sender_type==="admin"?"Admin":"You")+" · "+esc(fmt(m.created_at))+"</small>"+esc(m.message).replace(/\\n/g,"<br>")+"</div>").join("")+'</div><div class="card reply-card"><form id="replyForm"><label>Reply <span>*</span><textarea name="message" required maxlength="5000" placeholder="Write your reply..."></textarea></label><button class="button" type="submit">Send Reply</button><p class="form-status" id="replyStatus"></p></form></div>';document.querySelector("#replyForm").addEventListener("submit",sendReply)};async function load(){const st=document.querySelector("#trackStatus"),b=document.querySelector("#trackButton");b.disabled=true;st.className="form-status";st.textContent="Loading...";try{const d=await callFunction("track-application",Object.fromEntries(new FormData(trackForm).entries()));render(d);st.textContent=""}catch(err){document.querySelector("#conversation").classList.add("hidden");st.className="form-status error";st.textContent=err.message}finally{b.disabled=false}}async function sendReply(e){e.preventDefault();const f=e.currentTarget,st=document.querySelector("#replyStatus"),b=f.querySelector("button");b.disabled=true;st.className="form-status";st.textContent="Sending...";try{await callFunction("customer-reply",{applicationNumber:current.applicationNumber,mobileNumber:trackForm.elements.mobileNumber.value,message:new FormData(f).get("message")});f.reset();const d=await callFunction("track-application",{applicationNumber:current.applicationNumber,mobileNumber:trackForm.elements.mobileNumber.value});render(d);document.querySelector("#replyStatus").className="form-status success";document.querySelector("#replyStatus").textContent="Reply sent."}catch(err){st.className="form-status error";st.textContent=err.message}finally{b.disabled=false}}trackForm.addEventListener("submit",e=>{e.preventDefault();load()})}
+const SUPABASE_URL = "https://dxmyyymeyypxcjtmelvj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Tp-IbPEmWXuBvZ8md8CY7Q_TCua9njd";
+
+async function callFunction(name, body) {
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/${name}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_KEY,
+      },
+      body: JSON.stringify(body),
+    },
+  );
+
+  const data = await response
+    .json()
+    .catch(() => ({ error: "Unexpected server response" }));
+
+  if (!response.ok) {
+    throw new Error(data.error || "Request failed");
+  }
+
+  return data;
+}
+
+function escapeHtml(value = "") {
+  return String(value).replace(
+    /[&<>"']/g,
+    (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    })[character],
+  );
+}
+
+function formatDate(value) {
+  return new Date(value).toLocaleString([], {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+const contactForm = document.querySelector("#contactForm");
+
+if (contactForm) {
+  contactForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const button = document.querySelector("#submitButton");
+    const status = document.querySelector("#formStatus");
+
+    button.disabled = true;
+    status.className = "form-status";
+    status.textContent = "Submitting...";
+
+    try {
+      const formData = new FormData(contactForm);
+      const data = await callFunction(
+        "submit-contact",
+        Object.fromEntries(formData.entries()),
+      );
+
+      status.className = "form-status success";
+      status.innerHTML =
+        "Submitted successfully. Your Application Number is " +
+        `<strong>${escapeHtml(data.applicationNumber)}</strong>. ` +
+        "Save it to track your application.";
+
+      contactForm.reset();
+    } catch (error) {
+      status.className = "form-status error";
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+const trackForm = document.querySelector("#trackForm");
+
+if (trackForm) {
+  let currentApplication = null;
+
+  function renderConversation({ application, messages }) {
+    currentApplication = application;
+
+    const conversation = document.querySelector("#conversation");
+    conversation.classList.remove("hidden");
+
+    conversation.innerHTML = `
+      <div class="conversation-head">
+        <h2>Application ${escapeHtml(application.applicationNumber)}</h2>
+        <div class="meta">
+          Status:
+          <strong>${escapeHtml(application.status.replace("_", " "))}</strong>
+          · Submitted ${escapeHtml(formatDate(application.createdAt))}
+        </div>
+      </div>
+
+      <div class="messages">
+        ${messages
+          .map(
+            (message) => `
+              <div class="bubble ${escapeHtml(message.sender_type)}">
+                <small>
+                  ${message.sender_type === "admin" ? "Admin" : "You"}
+                  · ${escapeHtml(formatDate(message.created_at))}
+                </small>
+                ${escapeHtml(message.message).replace(/\\n/g, "<br>")}
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+
+      <div class="card reply-card">
+        <form id="replyForm">
+          <label>
+            Reply <span>*</span>
+            <textarea
+              name="message"
+              required
+              maxlength="5000"
+              placeholder="Write your reply..."
+            ></textarea>
+          </label>
+
+          <button class="button" type="submit">
+            Send Reply
+          </button>
+
+          <p class="form-status" id="replyStatus"></p>
+        </form>
+      </div>
+    `;
+
+    document
+      .querySelector("#replyForm")
+      .addEventListener("submit", sendReply);
+  }
+
+  async function loadApplication() {
+    const status = document.querySelector("#trackStatus");
+    const button = document.querySelector("#trackButton");
+
+    button.disabled = true;
+    status.className = "form-status";
+    status.textContent = "Loading...";
+
+    try {
+      const formData = new FormData(trackForm);
+      const data = await callFunction(
+        "track-application",
+        Object.fromEntries(formData.entries()),
+      );
+
+      renderConversation(data);
+      status.textContent = "";
+    } catch (error) {
+      document.querySelector("#conversation").classList.add("hidden");
+      status.className = "form-status error";
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function sendReply(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const status = document.querySelector("#replyStatus");
+    const button = form.querySelector("button");
+
+    button.disabled = true;
+    status.className = "form-status";
+    status.textContent = "Sending...";
+
+    try {
+      const message = new FormData(form).get("message");
+
+      await callFunction("customer-reply", {
+        applicationNumber: currentApplication.applicationNumber,
+        mobileNumber: trackForm.elements.mobileNumber.value,
+        message,
+      });
+
+      form.reset();
+
+      const data = await callFunction("track-application", {
+        applicationNumber: currentApplication.applicationNumber,
+        mobileNumber: trackForm.elements.mobileNumber.value,
+      });
+
+      renderConversation(data);
+
+      document.querySelector("#replyStatus").className =
+        "form-status success";
+      document.querySelector("#replyStatus").textContent = "Reply sent.";
+    } catch (error) {
+      status.className = "form-status error";
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  trackForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    loadApplication();
+  });
+}
