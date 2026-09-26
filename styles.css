@@ -148,6 +148,38 @@ textarea {
   font-size: 14px;
 }
 
+.application-number-result {
+  margin-top: 8px;
+}
+
+.application-number-result > span {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.application-number-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.application-number-row input {
+  margin-top: 0;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.application-number-row .button {
+  flex: 0 0 auto;
+}
+
+.application-number-result small {
+  display: block;
+  margin-top: 7px;
+  color: #68748a;
+}
+
 .success {
   color: #1b7a4a;
 }
