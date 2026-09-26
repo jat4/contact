@@ -79,7 +79,7 @@ grant select on public.admin_users to authenticated;
 grant select on public.applications to authenticated;
 grant select,insert on public.messages to authenticated;
 
-create policy "Admins can read their own admin record" on public.admin_users for select to authenticated using ((select auth.uid()));
+create policy "Admins can read their own admin record" on public.admin_users for select to authenticated using ((select auth.uid()) = user_id);
 create policy "Admins can read applications" on public.applications for select to authenticated using ((select private.is_admin()));
 create policy "Admins can read messages" on public.messages for select to authenticated using ((select private.is_admin()));
 create policy "Admins can send messages" on public.messages for insert to authenticated with check ((select private.is_admin()) and sender_type='admin');
