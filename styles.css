@@ -281,3 +281,50 @@ textarea {
     max-width: 94%;
   }
 }
+
+.application-number-success {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 24px;
+  background: rgba(20, 33, 61, .42);
+}
+
+.application-number-success .application-number-result {
+  width: min(100%, 520px);
+  margin: 0;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(20, 33, 61, .2);
+  color: #14213d;
+}
+
+.application-number-success .application-number-result > span {
+  font-size: 18px;
+}
+
+.application-number-success .application-number-row input {
+  text-align: center;
+  font-size: 22px;
+}
+
+@media (max-width: 640px) {
+  .application-number-success .application-number-result {
+    padding: 22px;
+  }
+
+  .application-number-success .application-number-row {
+    flex-direction: column;
+  }
+
+  .application-number-success .application-number-row input,
+  .application-number-success .application-number-row .button {
+    width: 100%;
+  }
+}
