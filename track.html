@@ -32,7 +32,12 @@
           <input
             name="applicationNumber"
             required
-            placeholder="APP-20260926-XXXXXXXX"
+            minlength="8"
+            maxlength="8"
+            inputmode="numeric"
+            pattern="[0-9]{8}"
+            autocomplete="off"
+            placeholder="8-digit Application Number"
           >
         </label>
 
