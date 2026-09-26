@@ -1,5 +1,9 @@
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/+esm";
+
 const SUPABASE_URL = "https://dxmyyymeyypxcjtmelvj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Tp-IbPEmWXuBvZ8md8CY7Q_TCua9njd";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let realtimeChannel = null;
 
 async function callFunction(name, body) {
   const response = await fetch(
@@ -206,6 +210,28 @@ if (trackForm) {
       .addEventListener("submit", sendReply);
   }
 
+  async function subscribeToApplication(applicationId) {
+    if (realtimeChannel) {
+      await supabase.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+
+    realtimeChannel = supabase
+      .channel(`application:${applicationId}`)
+      .on("broadcast", { event: "message_created" }, async () => {
+        try {
+          const data = await callFunction("track-application", {
+            applicationNumber: trackForm.elements.applicationNumber.value,
+            mobileNumber: trackForm.elements.mobileNumber.value,
+          });
+          renderConversation(data);
+        } catch (error) {
+          console.error("Realtime refresh failed:", error);
+        }
+      })
+      .subscribe();
+  }
+
   async function loadApplication() {
     const status = document.querySelector("#trackStatus");
     const button = document.querySelector("#trackButton");
@@ -222,6 +248,7 @@ if (trackForm) {
       );
 
       renderConversation(data);
+      await subscribeToApplication(data.application.id);
       status.textContent = "";
     } catch (error) {
       document.querySelector("#conversation").classList.add("hidden");
