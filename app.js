@@ -45,6 +45,12 @@ function formatDate(value) {
   });
 }
 
+function statusLabel(value) {
+  return String(value || "")
+    .replace(/_/g, " ")
+    .replace(/^customer reply$/i, "applicant reply");
+}
+
 const contactForm = document.querySelector("#contactForm");
 
 if (contactForm) {
@@ -97,7 +103,7 @@ if (trackForm) {
         <h2>Application ${escapeHtml(application.applicationNumber)}</h2>
         <div class="meta">
           Status:
-          <strong>${escapeHtml(application.status.replace("_", " "))}</strong>
+          <strong>${escapeHtml(statusLabel(application.status))}</strong>
           · Submitted ${escapeHtml(formatDate(application.createdAt))}
         </div>
       </div>
