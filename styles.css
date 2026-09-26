@@ -282,49 +282,71 @@ textarea {
   }
 }
 
-.application-number-success {
+
+.application-number-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
   padding: 24px;
-  background: rgba(20, 33, 61, .42);
+  background: rgba(20, 33, 61, .45);
 }
 
-.application-number-success .application-number-result {
-  width: min(100%, 520px);
+.application-number-overlay .application-number-result {
+  width: min(520px, 100%);
   margin: 0;
   padding: 30px;
   background: #fff;
   border: 1px solid #e5e9f0;
   border-radius: 20px;
-  box-shadow: 0 24px 70px rgba(20, 33, 61, .2);
+  box-shadow: 0 24px 70px rgba(20, 33, 61, .22);
   color: #14213d;
+  text-align: center;
 }
 
-.application-number-success .application-number-result > span {
-  font-size: 18px;
+.application-number-overlay .application-number-result > span {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 8px;
 }
 
-.application-number-success .application-number-row input {
+.application-number-overlay .application-number-result p {
+  margin: 0 0 14px;
+  color: #68748a;
+}
+
+.application-number-overlay .application-number-row {
+  justify-content: center;
+}
+
+.application-number-overlay .application-number-row input {
   text-align: center;
   font-size: 22px;
+  font-weight: 800;
+}
+
+.application-number-overlay .application-number-result small {
+  display: block;
+  margin-top: 10px;
+  color: #68748a;
 }
 
 @media (max-width: 640px) {
-  .application-number-success .application-number-result {
+  .application-number-overlay .application-number-result {
     padding: 22px;
   }
 
-  .application-number-success .application-number-row {
+  .application-number-overlay .application-number-row {
     flex-direction: column;
   }
 
-  .application-number-success .application-number-row input,
-  .application-number-success .application-number-row .button {
+  .application-number-overlay .application-number-row input,
+  .application-number-overlay .application-number-row .button {
     width: 100%;
   }
 }
