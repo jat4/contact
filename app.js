@@ -77,10 +77,15 @@ if (contactForm) {
         Object.fromEntries(formData.entries()),
       );
 
-      status.className = "form-status success application-number-success";
-      status.innerHTML = `
-        <div class="application-number-result">
-          <span>Application Number</span>
+      status.className = "form-status success";
+      status.textContent = "";
+
+      const resultOverlay = document.createElement("div");
+      resultOverlay.className = "application-number-overlay";
+      resultOverlay.innerHTML = `
+        <div class="application-number-result" role="dialog" aria-modal="true" aria-labelledby="applicationNumberTitle">
+          <span id="applicationNumberTitle">Application Submitted</span>
+          <p>Your Application Number is:</p>
           <div class="application-number-row">
             <input
               id="applicationNumberResult"
@@ -101,10 +106,12 @@ if (contactForm) {
         </div>
       `;
 
-      document
+      document.body.appendChild(resultOverlay);
+
+      resultOverlay
         .querySelector("#copyApplicationNumber")
         .addEventListener("click", async () => {
-          const copyButton = document.querySelector("#copyApplicationNumber");
+          const copyButton = resultOverlay.querySelector("#copyApplicationNumber");
 
           try {
             await navigator.clipboard.writeText(data.applicationNumber);
@@ -113,12 +120,18 @@ if (contactForm) {
               copyButton.textContent = "Copy";
             }, 1800);
           } catch {
-            const input = document.querySelector("#applicationNumberResult");
+            const input = resultOverlay.querySelector("#applicationNumberResult");
             input.focus();
             input.select();
             copyButton.textContent = "Select & Copy";
           }
         });
+
+      resultOverlay.addEventListener("click", (event) => {
+        if (event.target === resultOverlay) {
+          resultOverlay.remove();
+        }
+      });
 
       contactForm.reset();
     } catch (error) {
