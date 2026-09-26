@@ -1,7 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/+esm";
 
 const SUPABASE_URL = "https://dxmyyymeyypxcjtmelvj.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Tp-IbPEmWXuBv8zmd8CY7Q_TCua9njd";
+const SUPABASE_KEY = "sb_publishable_Tp-IbPEmWXuBvZ8md8CY7Q_TCua9njd";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 let realtimeChannel = null;
 let conversationPoll = null;
