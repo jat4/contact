@@ -47,17 +47,23 @@ create function public.set_application_activity()
 returns trigger language plpgsql set search_path=''
 as $$ begin new.updated_at=now(); new.last_activity_at=now(); return new; end; $$;
 
+revoke all on function public.set_application_activity() from public, anon, authenticated;
+
 create trigger applications_activity_trigger before update on public.applications for each row execute function public.set_application_activity();
 
 create function public.set_message_activity()
 returns trigger language plpgsql set search_path=''
 as $$ begin update public.applications set last_activity_at=now(),updated_at=now(),status=case when new.sender_type='admin' then 'replied' else 'customer_reply' end where id=new.application_id; return new; end; $$;
 
+revoke all on function public.set_message_activity() from public, anon, authenticated;
+
 create trigger messages_activity_trigger after insert on public.messages for each row execute function public.set_message_activity();
 
 create function public.generate_application_number()
 returns trigger language plpgsql set search_path=''
 as $$ begin if new.application_number is null or new.application_number='' then new.application_number='APP-'||to_char(coalesce(new.created_at,now()),'YYYYMMDD')||'-'||upper(encode(gen_random_bytes(4),'hex')); end if; return new; end; $$;
+
+revoke all on function public.generate_application_number() from public, anon, authenticated;
 
 create trigger application_number_trigger before insert on public.applications for each row execute function public.generate_application_number();
 
@@ -70,12 +76,11 @@ revoke all on table public.applications from anon, authenticated;
 revoke all on table public.messages from anon, authenticated;
 
 grant select on public.admin_users to authenticated;
-grant select,update on public.applications to authenticated;
+grant select on public.applications to authenticated;
 grant select,insert on public.messages to authenticated;
 
-create policy "Admins can read their own admin record" on public.admin_users for select to authenticated using ((select auth.uid())=user_id);
+create policy "Admins can read their own admin record" on public.admin_users for select to authenticated using ((select auth.uid()));
 create policy "Admins can read applications" on public.applications for select to authenticated using ((select private.is_admin()));
-create policy "Admins can update applications" on public.applications for update to authenticated using ((select private.is_admin())) with check ((select private.is_admin()));
 create policy "Admins can read messages" on public.messages for select to authenticated using ((select private.is_admin()));
 create policy "Admins can send messages" on public.messages for insert to authenticated with check ((select private.is_admin()) and sender_type='admin');
 
