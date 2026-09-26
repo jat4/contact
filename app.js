@@ -77,7 +77,7 @@ if (contactForm) {
         Object.fromEntries(formData.entries()),
       );
 
-      status.className = "form-status success";
+      status.className = "form-status success application-number-success";
       status.innerHTML = `
         <div class="application-number-result">
           <span>Application Number</span>
