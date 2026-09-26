@@ -75,7 +75,7 @@ function updateMessages(messages, { initial = false } = {}) {
   container.innerHTML = (messages || []).map((message) => `
     <div class="bubble ${escapeHtml(message.sender_type)}">
       <small>${message.sender_type === "admin" ? "Admin" : "You"} · ${escapeHtml(formatDate(message.created_at))}</small>
-      <div class="message-text">${escapeHtml(message.message).replace(/\\n/g, "<br>")}</div>
+      <div class="message-text">${escapeHtml(message.message).replace(/\n/g, "<br>")}</div>
     </div>
   `).join("");
 
