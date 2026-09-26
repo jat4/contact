@@ -1,8 +1,5 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/+esm";
-
 const SUPABASE_URL = "https://dxmyyymeyypxcjtmelvj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Tp-IbPEmWXuBv8zmd8CY7Q_TCua9njd";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const contactForm = document.querySelector("#contactForm");
 const trackForm = document.querySelector("#trackForm");
@@ -185,6 +182,7 @@ function renderConversation(data, initial = false) {
 
   updateConversationMeta(application);
   if (initial) updateMessages(data.messages, true);
+  else if (data.messages && data.messages.length) updateMessages(data.messages, false);
 }
 
 async function pollConversation() {
