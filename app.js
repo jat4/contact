@@ -51,6 +51,12 @@ function statusLabel(value) {
     .replace(/^customer reply$/i, "applicant reply");
 }
 
+document.querySelectorAll('input[name="mobileNumber"]').forEach((input) => {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^0-9]/g, "");
+  });
+});
+
 const contactForm = document.querySelector("#contactForm");
 
 if (contactForm) {
