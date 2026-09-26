@@ -1,0 +1,8 @@
+[functions.submit-contact]
+verify_jwt = false
+
+[functions.track-application]
+verify_jwt = false
+
+[functions.customer-reply]
+verify_jwt = false
