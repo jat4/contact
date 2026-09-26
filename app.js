@@ -4,6 +4,8 @@ const SUPABASE_URL = "https://dxmyyymeyypxcjtmelvj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Tp-IbPEmWXuBvZ8md8CY7Q_TCua9njd";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 let realtimeChannel = null;
+let conversationPoll = null;
+let lastMessageId = null;
 
 async function callFunction(name, body) {
   const response = await fetch(
@@ -217,7 +219,9 @@ if (trackForm) {
     }
 
     realtimeChannel = supabase
-      .channel(`application:${applicationId}`)
+      .channel(`application:${applicationId}`, {
+        config: { private: false },
+      })
       .on("broadcast", { event: "message_created" }, async () => {
         try {
           const data = await callFunction("track-application", {
@@ -229,7 +233,35 @@ if (trackForm) {
           console.error("Realtime refresh failed:", error);
         }
       })
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.warn("Realtime channel unavailable:", error || status);
+        }
+      });
+
+    if (conversationPoll) {
+      clearInterval(conversationPoll);
+    }
+
+    conversationPoll = setInterval(async () => {
+      try {
+        const data = await callFunction("track-application", {
+          applicationNumber: trackForm.elements.applicationNumber.value,
+          mobileNumber: trackForm.elements.mobileNumber.value,
+        });
+
+        const newestMessageId = data.messages?.length
+          ? data.messages[data.messages.length - 1].id
+          : null;
+
+        if (newestMessageId !== lastMessageId) {
+          lastMessageId = newestMessageId;
+          renderConversation(data);
+        }
+      } catch (error) {
+        console.warn("Automatic conversation update failed:", error);
+      }
+    }, 2000);
   }
 
   async function loadApplication() {
@@ -248,6 +280,9 @@ if (trackForm) {
       );
 
       renderConversation(data);
+      lastMessageId = data.messages?.length
+        ? data.messages[data.messages.length - 1].id
+        : null;
       await subscribeToApplication(data.application.id);
       status.textContent = "";
     } catch (error) {
